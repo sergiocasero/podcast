@@ -7,13 +7,16 @@ Actualmente utiliza la API de iTunes para obtener los rss de los podcasts.
 ### Tecnologías utilizadas
 - Polymer
 
-#### Componentes
+### Componentes
     - paper-header-panel
     - paper-item
     - paper-toolbar
     - paper-scroll-header-panel
     - iron-ajax
     - iron-image
+    - paper-fab
+    - paper-input
+    - paper-checkbox
 
 ### Version
 0.0.1
