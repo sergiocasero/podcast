@@ -1,0 +1,21 @@
+<link rel="import" href="../polymer/polymer.html"> 
+<link rel="import" href="../iron-image/iron-image.html">
+<dom-module id="podcast-card">
+    <link rel="import" type="css" href="podcast-card.css">
+    <template>
+        <iron-image sizing="cover" src="{{item.artworkUrl600}}"  on-click="showdetail"></iron-image>
+        <div  on-click="showdetail">{{item.collectionCensoredName}}</div>
+        <span on-click="showdetail">{{item.artistName}}</span>
+        <!--<paper-checkbox on-change="addPodcast" id="{{item.trackId}}"></paper-checkbox>-->
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: "podcast-card",
+        showdetail: function(){
+            this.fire("showdetail", {
+                item: this.item
+            });
+        }
+    });
+</script>

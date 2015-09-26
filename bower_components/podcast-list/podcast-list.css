@@ -1,0 +1,74 @@
+:host{
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.desktopFav, .mobileFav{
+    position: fixed;
+}
+.desktopFav{    
+    right: 20px;
+    top: 270px;
+}
+.mobileFav{
+    right: 10px;
+    bottom: 10px;
+    display: none;
+}
+.cover{
+    margin: 100px;
+    background: white;
+    border-radius: 5px;
+    min-height: 400px;
+    @apply(--shadow-elevation-2dp);
+}
+.header{ height: 300px;}
+.title{ display: none; }
+.mobile{ display: none; }
+
+@media (max-width: 800px) {
+   .desktopFav{
+       display: none;
+    } 
+    .mobile{
+        margin: 0px;
+        margin-top: 70px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+    .cover{ display: none; }
+    .mobile{ display: inherit; }
+    .header{ height: 56px; }
+    .title{  display: inherit;} 
+    .desktopFav{ display: none; } 
+    .mobileFav{ display: inherit; } 
+}
+.icon{
+    width: 50px;
+    height: 50px;
+}
+iron-image{
+    width: 50px;
+    height: 50px;
+}
+paper-icon-item{
+    margin: 10px;
+    @apply(--shadow-elevation-2dp);
+    background: white;
+}
+podcast-card{
+    margin: 10px;
+    float: left;
+}
+paper-header-panel{
+    height: 100%;
+    background-color: var(--paper-grey-200, #eee);
+    /* background for toolbar when it is at its full size */
+}
+#nopodcasts{
+    width: 100%;
+    margin-top: 200px;
+    position: absolute;
+    font-size: 25px;
+    text-align: center;
+}

@@ -1,0 +1,183 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../neon-animation/neon-animatable-behavior.html">
+<link rel="import" href="../paper-scroll-header-panel/paper-scroll-header-panel.html">
+<link rel="import" href="../iron-image/iron-image.html">
+<link rel="import" href="../iron-icon/iron-icon.html"> 
+<link rel="import" href="../iron-icons/iron-icons.html"> 
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<dom-module id="podcast-detail">
+    <style>
+        :host{
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        paper-scroll-header-panel{
+            height: 100%;
+            background-color: var(--paper-grey-200, #eee);
+            /* background for toolbar when it is at its full size */
+        }
+        paper-toolbar {
+            /* custom toolbar height */
+            height: 230px;
+            background-color: transparent;
+            overflow: visible;
+        }
+        #content{
+            width: 100%;
+            margin: auto;
+        }
+        .capitulo{
+            max-width: 400px;
+            overflow: hidden;
+            @apply(--shadow-elevation-2dp);
+            margin: 10px;
+            display: inline-block;
+            background: white;
+        }
+        .date{
+            font-size: 12px;
+            color: grey;
+        }
+        audio{
+            width: 400px;
+        }
+    </style>
+    <template>
+        <paper-scroll-header-panel id="panel" condenses keep-condensed-header header-height="230" 
+                                    colors="{{colors}}" condensed-header-height="66">
+            <paper-toolbar>
+                <paper-icon-button icon="arrow-back" id="back" on-click="back"></paper-icon-button>
+                <span class="title">{{item.collectionCensoredName}}</span>
+            </paper-toolbar>
+            <div id="content">
+                <template is="dom-repeat" items="{{capitulos}}">
+                    <div class="capitulo">
+                        <iron-image sizing="cover" style="width:400px; height: 200px;" src="{{item.itunes_image.attributes.href}}"></iron-image>
+                        <div>{{item.title.#text}}</div>
+                        <span class="date">{{item.pubDate.#text}}</span>
+                        <audio controls>
+                            <source src="{{item.enclosure.attributes.url}}" type="{{item.enclosure.attributes.type}}">
+                            Your browser does not support the audio tag.
+                        </audio>
+                    </div>
+                </template>
+            </div>
+            
+        </paper-scroll-header-panel>
+        <iron-ajax id="getPodcastInfo"
+            handle-as="json"
+            on-response="responseCapitulos"
+            url="http://todotelegram.com/podcast/getPodcastInfo.php"></iron-ajax>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'podcast-detail',
+        behaviors: [
+            Polymer.NeonAnimatableBehavior
+        ],
+        properties: {
+
+            sharedElements: {
+                type: Object,
+                value: function() {
+                    return {
+                        'hero': this.$.panel
+                    };
+                }
+            },
+
+            animationConfig: {
+                type: Object,
+                value: function() {
+                    return {
+                        
+                        'entry': [{
+                            name: 'transform-animation',
+                            node: this.$.back,
+                            transformOrigin: 'rotate(180deg)',
+                            transformFrom: 'rotate(180deg)',
+                            transformTo: 'rotate(0deg)'
+                        },{
+                            name: 'transform-animation',
+                            node: this.$.panel,
+                            transformOrigin: 'translateX(100%)',
+                            transformFrom: 'translateX(100%)',
+                            transformTo: 'translateX(0)'
+                        }],
+                        'exit': [{
+                            name: 'transform-animation',
+                            node: this.$.back,
+                            transformOrigin: 'rotate(0deg)',
+                            transformFrom: 'rotate(0deg)',
+                            transformTo: 'rotate(180deg)'
+                        },{
+                            name: 'transform-animation',
+                            node: this.$.panel,
+                            transformOrigin: 'translateX(0)',
+                            transformFrom: 'translateX(0)',
+                            transformTo: 'translateX(100%)'
+                        }]
+
+                    }
+                }
+            }
+
+        },
+        responseCapitulos: function(event){
+            var xml = new window.DOMParser().parseFromString(event.detail.response.contents, "text/xml");
+            var capitulos = this.xmlToJson(xml).rss.channel.item;
+            //this.capitulos = new Array();
+            this.capitulos = capitulos;
+        },
+        updateUrl: function(url){
+            this.$.getPodcastInfo.params = {
+                podcastURL: url
+            };
+            this.$.getPodcastInfo.generateRequest();
+        },
+        xmlToJson: function( xml ) {
+
+            // Create the return object
+            var obj = {};
+
+            if ( xml.nodeType == 1 ) { // element
+                // do attributes
+                if ( xml.attributes.length > 0 ) {
+                    obj["attributes"] = {};
+                    for ( var j = 0; j < xml.attributes.length; j++ ) {
+                        var attribute = xml.attributes.item( j );
+                        obj["attributes"][attribute.nodeName] = attribute.nodeValue;
+                    }
+                }
+            } else if ( xml.nodeType == 3 ) { // text
+                obj = xml.nodeValue;
+            }
+
+            // do children
+            if ( xml.hasChildNodes() ) {
+                for( var i = 0; i < xml.childNodes.length; i++ ) {
+                    var item = xml.childNodes.item(i);
+                    var nodeName = item.nodeName.replace(":", "_");
+                    
+                    if ( typeof(obj[nodeName] ) == "undefined" ) {
+                    obj[nodeName] = this.xmlToJson( item );
+                    } else {
+                        if ( typeof( obj[nodeName].push ) == "undefined" ) {
+                            var old = obj[nodeName];
+                            obj[nodeName] = [];
+                            obj[nodeName].push( old );
+                        }
+                        obj[nodeName].push( this.xmlToJson( item ) );
+                    }
+                }
+            }
+            return obj;
+        },
+        back: function(){
+            this.fire("back");
+        }
+    });
+</script>

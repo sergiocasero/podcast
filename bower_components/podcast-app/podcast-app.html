@@ -1,0 +1,83 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../podcast-detail/podcast-detail.html">
+<link rel="import" href="../podcast-list/podcast-list.html">
+<link rel="import" href="../podcast-search/podcast-search.html">
+<link rel="import" href="../neon-animation/neon-animated-pages.html">
+<link rel="import" href="../neon-animation/neon-animations.html">
+<dom-module id="podcast-app">
+    <style>
+        #pages{
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+    <template>
+        <neon-animated-pages id="pages">
+            <podcast-list id="list" on-add="addPodcast" on-showdetail="showdetail"></podcast-list>
+            <podcast-search id="search" on-back="searchBack"></podcast-search>
+            <podcast-detail id="detail" on-back="detailBack"></podcast-detail>
+        </neon-animated-pages>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'podcast-app',
+        properties: {
+            podcasts:  {
+                type: Array,
+                value: function(){
+                    var podcasts = JSON.parse(localStorage.getItem("podcasts"));
+                    console.log(podcasts);
+                    return podcasts;
+                }
+            }
+        },
+        created: function(){
+            if(typeof(Storage) != "undefined"){
+                if(localStorage.getItem("podcasts") == null){
+                    localStorage.setItem("podcasts", JSON.stringify(new Array()));
+                }
+                //localStorage.setItem("podcasts", JSON.stringify(new Array()));
+            }else{
+                console.log("Tu navegador no soporta local storage");
+            }
+        },
+        ready: function(){
+            this.$.list.podcasts = this.podcasts;
+            this.$.pages.selected = 0;
+        },
+        addPodcast: function(){
+            this.$.search.favourites = new Array();
+            this.$.pages.selected = 1;
+        },
+        detailBack: function(){
+            this.$.pages.selected = 0;
+        },
+        searchBack: function(event){
+            var news = event.detail.podcasts;
+            
+            for(var i = 0; i < news.length; i++){
+                this.push("podcasts", news[i]);
+            }
+            
+            this.$.list.updatePodcasts(this.podcasts);
+            localStorage.setItem("podcasts", JSON.stringify(this.podcasts));
+            
+            this.$.pages.selected = 0;
+        },
+        showdetail: function(event){
+            var item = event.detail.item;
+            this.$.detail.item = item;
+            this.$.detail.capitulos = new Array();
+            this.$.detail.colors = {
+                condensed: "#1A237E", 
+                imgBg: item.artworkUrl600,
+                full: "#3F51B5"
+            };
+            this.$.detail.updateUrl(item.feedUrl);
+            this.$.pages.selected = 2;
+        }
+    });
+</script>
